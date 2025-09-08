@@ -13,7 +13,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 # Configuration
 API_URL="https://ssh.maptechdata.com/api"
@@ -76,6 +76,15 @@ get_system_info() {
     echo
 }
 
+# Function to read input from terminal (simplified since stdin is redirected)
+read_from_terminal() {
+    local prompt=$1
+    local input_var=$2
+    
+    echo -n "$prompt"
+    read -r "$input_var"
+}
+
 # Main function
 main() {
     print_header
@@ -108,8 +117,9 @@ main() {
     while [ $attempts -lt $max_attempts ]; do
         print_color $YELLOW "🔑 Please enter your 6-digit access code:"
         print_color $CYAN "   (Get this from the Telegram bot using 'Get Access Code' button)"
-        echo -n "   Access Code: "
-        read -r access_code
+        
+        # Use the fixed input reading function
+        read_from_terminal "   Access Code: " access_code
         
         if validate_code "$access_code"; then
             break
@@ -181,12 +191,13 @@ main() {
     print_color $CYAN "⏰ Execution Time: $exec_time"
     echo
     
-    # Ask for confirmation
+    # Ask for confirmation using the fixed input function
     print_color $YELLOW "⚠️  You are about to execute a script on your system."
     print_color $YELLOW "   Please ensure you trust this script before proceeding."
     echo
-    echo -n "Do you want to continue? (y/N): "
-    read -r confirm
+    
+    local confirm=""
+    read_from_terminal "Do you want to continue? (y/N): " confirm
     
     if [[ ! $confirm =~ ^[Yy]([Ee][Ss])?$ ]]; then
         print_color $YELLOW "❌ Script execution cancelled by user."
@@ -253,7 +264,8 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Check internet connectivity
-if ! curl -s --head --connect-timeout 5 https://ssh.maptechdata.com > /dev/null; then
+if ! curl -s --head --connect-timeout 5 https://ssh.maptechdata.com > /dev/null 2>&1 && \
+   ! wget -q --spider --timeout=5 https://ssh.maptechdata.com > /dev/null 2>&1; then
     print_color $RED "❌ Error: Cannot connect to MAPTECH servers."
     print_color $RED "   Please check your internet connection and try again."
     exit 1
