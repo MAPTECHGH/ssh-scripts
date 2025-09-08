@@ -1,6 +1,6 @@
 # MAPTECH SSH Scripts Runner
 
-Premium VPS script execution system by M-AVETCH IT SERVICES.
+Premium VPS script execution system by M-AVETECH IT SERVICES.
 
 ## Usage
 
